@@ -3,7 +3,9 @@ package  main
 
 import ("fmt"
 	"errors"
+	"context"
 )
+
 
 //除了main包之外，其它的包最后都会生成*.a文件（也就是包文件）并放置在$GOPATH/pkg/$GOOS_$GOARCH
 //为了打印Hello, world...，我们调用了一个函数Printf，这个函数来自于fmt包，所以我们在第三行中导入了系统级别的fmt包：import "fmt"。
@@ -109,8 +111,173 @@ func main() {
 	//注意大写开头相当于，共有的
 	//TestMe() todo  还不知道 咋个做  哈哈
 	//testMeme()
-
+    //array就是数组
 	arrayDemo()
+
+	//在很多应用场景中，数组并不能满足我们的需求。在初始定义数组时，我们并不知道需要多大的数组，因此我们就需要“动态数组”。在Go里面这种数据结构叫slice
+	sliceDemo()
+
+	//pic.Show(Pic)
+}
+
+
+func Pic(dx, dy int) [][]uint8 {
+	// 外层slice
+	a := make([][]uint8, dy)
+	for x := range a {
+		// 里层slice
+		b := make([]uint8, dx)
+		for y := range b {
+			// 给里层slice每个元素赋值
+			b[y] = uint8(x*y - 1)
+		}
+		// 给外层slice每个元素赋值
+		a[x] = b
+	}
+	return a
+}
+
+//在很多应用场景中，数组并不能满足我们的需求。在初始定义数组时，我们并不知道需要多大的数组，因此我们就需要“动态数组”。在Go里面这种数据结构叫slice
+func sliceDemo() {
+    context.TODO()
+    //slice并不是真正意义上的动态数组，而是一个引用类型。slice总是指向一个底层array，slice的声明也可以像array一样，只是不需要长度。
+	// 和声明array一样，只是少了长度
+    var  fslice  []int
+    fmt.Println("shiming sliceDemo  start")
+	fmt.Println(append(fslice, 12))
+    //声明一个slice 并且初始化 数据
+
+    slice :=[]byte{'a','d','d','1'}//[97 100 100 49]
+	//println(slice)
+    fmt.Println(slice)
+    fmt.Println(len(slice))
+
+
+	//slice可以从一个数组或一个已经存在的slice中再次声明。slice通过array[i:j]来获取，其中i是数组的开始位置，j是结束位置，但不包含array[j]，它的长度是j-i。
+	// 声明一个含有10个元素元素类型为byte的数组
+	var ar = [10]byte {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'}//[97 98 99 100 101 102 103 104 105 106]
+
+	// 声明两个含有byte的slice
+	var a, b []byte
+
+	// a指向数组的第3个元素开始，并到第五个元素结束，
+	a = ar[2:5] // [99 100 101]
+	//现在a含有的元素: ar[2]、ar[3]和ar[4]
+
+	// b是数组ar的另一个slice
+	b = ar[3:5]//[100 101]
+	// b的元素是：ar[3]和ar[4]
+	fmt.Println(ar)
+	fmt.Println(a)
+	fmt.Println(b)
+	//注意slice和数组在声明时的区别：声明数组时，方括号内写明了数组的长度或使用...自动计算长度，而声明slice时，方括号内没有任何字符。
+//		c := [...]int{4, 5, 6}   例如这个  自动计算 数组的长度
+     //  todo  注意看 2.2.slice.png  
+
+	//slice有一些简便的操作
+	//
+	//slice的默认开始位置是0，ar[:n]等价于ar[0:n]
+	//slice的第二个序列默认是数组的长度，ar[n:]等价于ar[n:len(ar)]
+	//如果从一个数组里面直接获取slice，可以这样ar[:]，因为默认第一个序列是0，第二个是数组的长度，即等价于ar[0:len(ar)]
+	// 声明一个数组
+
+	var array = [10]byte{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'}
+	// 声明两个slice
+	var aSlice, bSlice []byte
+	fmt.Println("shiming start slice有一些简便的操作 ")
+	fmt.Println(array) //[97 98 99 100 101 102 103 104 105 106]
+	fmt.Println(array[0])//97 从0开始
+	// 演示一些简便操作
+	aSlice = array[:3] // 等价于aSlice = array[0:3] aSlice包含元素: a,b,c
+	fmt.Println(aSlice)//[97 98 99] 截取角标3前面的 三个数字  不包括3的角标
+	aSlice = array[5:] // 等价于aSlice = array[5:10] aSlice包含元素: f,g,h,i,j
+	fmt.Println(aSlice)//[102 103 104 105 106]  截取角标5后面的数组，包括角标5的数字
+
+	aSlice = array[:]  // 等价于aSlice = array[0:10] 这样aSlice包含了全部的元素
+	fmt.Println(aSlice)//[97 98 99 100 101 102 103 104 105 106]
+	// 从slice中获取slice
+	aSlice = array[3:7]  // aSlice包含元素: d,e,f,g，len=4，cap=7
+	fmt.Println(aSlice)//[100 101 102 103]含头不含尾巴
+	bSlice = aSlice[1:3] // bSlice 包含aSlice[1], aSlice[2] 也就是含有: e,f
+	fmt.Println(bSlice)//[101 102]
+	bSlice = aSlice[:3]  // bSlice 包含 aSlice[0], aSlice[1], aSlice[2] 也就是含有: d,e,f
+	fmt.Println(bSlice)
+	bSlice = aSlice[0:5] // 对slice的slice可以在cap范围内扩展，此时bSlice包含：d,e,f,g,h
+	fmt.Println(bSlice)
+	bSlice = aSlice[:]   // bSlice包含所有aSlice的元素: d,e,f,g
+	fmt.Println(bSlice)
+
+
+    //slice是引用类型，所以当引用改变其中元素的值时，其它的所有引用都会改变该值，例如上面的aSlice和bSlice，如果修改了aSlice中元素的值，那么bSlice相对应的值也会改变。
+
+
+    /*
+    从概念上面来说slice像一个结构体，这个结构体包含了三个元素：
+    一个指针，指向数组中slice指定的开始位置
+    长度，即slice的长度
+    最大长度，也就是slice开始位置到数组的最后位置的长度
+    */
+
+	Array_a := [10]byte{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'}
+	Slice_a := Array_a[2:5]
+	fmt.Println("shiming Slice_a")
+	fmt.Println(Slice_a)//[99 100 101]
+    //  todo    2.2.slice2.png   注意看看这个图  非常的有意思的哦
+   //内存管理器会重新划分一块容量值为原容量值*2大小的内存空间，依次类推
+	var  sliceArr  [8]int
+	//组的len和cap是永远相等的
+	fmt.Println("slice 默认的长度")
+	fmt.Println(cap(sliceArr))
+    fmt.Println(len(sliceArr))
+
+
+	//len 获取slice的长度
+	//cap 获取slice的最大容量
+	//append 向slice里面追加一个或者多个元素，然后返回一个和slice一样类型的slice
+	//copy 函数copy从源slice的src中复制元素到目标dst，并且返回复制的元素的个数
+
+
+	sliceArrTwo :=[]int{10,52,48,58,96,474,152,654,74}
+	fmt.Println(sliceArrTwo)
+	fmt.Println(len(sliceArrTwo))
+	fmt.Println(cap(sliceArrTwo))
+	fmt.Println(append(sliceArrTwo, 110))
+	var anotherSlice  []int
+	//  todo   如何取copy数据  ?????
+	fmt.Println(anotherSlice)
+	fmt.Println(copy(sliceArrTwo, anotherSlice))
+	fmt.Println(anotherSlice)
+
+	//从Go1.2开始slice支持了三个参数的slice，之前我们一直采用这种方式在slice或者array基础上来获取一个slice
+	var array1 [10]int
+	slice11 := array1[2:4]
+	fmt.Println(slice11)
+	fmt.Println(cap(slice11))//8  这样得到的slice的长度为8
+	//这个例子里面slice11的容量是8，新版本里面可以指定这个容量
+	var array2 [10]int
+	slice11 = array2[2:4:7]
+	fmt.Println(slice11)
+	fmt.Println(cap(slice11))//容量==5
+	//上面这个的容量就是7-2，即5。这样这个产生的新的slice就没办法访问最后的三个元素。
+     //新版本里面可以指定这个容量
+	slice11 = array2[2:4:9]
+	fmt.Println(cap(slice11))//这个cap的长度为7
+	fmt.Println(len(slice11))//2 长度为2
+	fmt.Println(slice11) //打印出来这个 slice1的值为  [0 0]
+
+    //cap的 9-0   新版本里面可以指定这个容量
+	slice11 = array2[0:4:9]
+	fmt.Println(cap(slice11))//这个cap的长度为9
+	fmt.Println(len(slice11))//4 长度为4
+	fmt.Println(slice11) //打印出来这个 slice1的值为 [0 0 0 0]
+
+
+	//如果slice是这样的形式array[:i:j]，即第一个参数为空，默认值就是0。  这个值和上面的 array2[0:4:9]  是一样的啊
+	slice11 = array2[:4:9]
+	fmt.Println(cap(slice11))//这个cap的长度为9
+	fmt.Println(len(slice11))//4 长度为4
+	fmt.Println(slice11) //打印出来这个 slice1的值为 [0 0 0 0]
+
 }
 //array就是数组，它的定义方式如下：
 func arrayDemo() {
@@ -150,7 +317,7 @@ func arrayDemo() {
 
 	fmt.Println(doubleArray)
 	fmt.Println(easyArray)
-	//如果后续使用到了 数组的这一项的功能的话，回来再来看看 有点惊喜哦
+	//如果后续使用到了 数组的这一项的功能的话，回来再来看看 有点惊喜哦     todo
     fmt.Println(doubleArray[0][1])
 	fmt.Println(len(doubleArray[1]))
 
