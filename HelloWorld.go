@@ -118,6 +118,108 @@ func main() {
 	sliceDemo()
 
 	//pic.Show(Pic)
+    //map也就是Python中字典的概念，它的格式为map[keyType]valueType
+	mapDemo()
+
+	//make、new操作
+	makeAndNewDemo()
+
+
+	//零值  关于“零值”，所指并非是空值，而是一种“变量未填充前”的默认值，通常为0。 此处罗列 部分类型 的 “零值”
+ /*
+	int     0
+	int8    0
+	int32   0
+	int64   0
+	uint    0x0
+	rune    0 //rune的实际类型是 int32
+	byte    0x0 // byte的实际类型是 uint8
+	float32 0 //长度为 4 byte
+	float64 0 //长度为 8 byte
+	bool    false
+	string  ""
+*/
+}
+//make用于内建类型（map、slice 和channel）的内存分配。new用于各种类型的内存分配。   后续还要加强 去好好看看内存分配的问题
+func makeAndNewDemo() {
+	//内建函数new本质上说跟其它语言中的同名函数功能一样：new(T)分配了零值填充的T类型的内存空间，并且返回其地址，即一个*T类型的值。用Go的术语说，它返回了一个指针，指向新分配的类型T的零值。有一点非常重要：
+	//new返回指针。       todo
+
+
+	//内建函数make(T, args)与new(T)有着不同的功能，make只能创建slice、map和channel，并且返回一个有初始值(非零)的T类型，而不是*T。本质来讲，导致这三个类型有所不同的原因是指向数据结构的引用在使用前必须被初始化。例如，一个slice，是一个包含指向数据（内部array）的指针、长度和容量的三项描述符；在这些项目被初始化之前，slice为nil。对于slice、map和channel来说，make初始化了内部的数据结构，填充适当的值。
+     //make返回初始化后的（非零）值。    todo
+
+
+     //注意 图片    2.2 makenew.png  todo 图2.5 make和new对应底层的内存分配
+
+
+}
+//map的读取和设置也类似slice一样，通过key来操作，只是slice的index只能是｀int｀类型，而map多了很多类型，可以是int，可以是string及所有完全定义了==与!=操作的类型
+func mapDemo() {
+	// 声明一个key是字符串，值为int的字典,这种方式的声明需要在使用之前使用make初始化
+	var numbers map[string]int
+	// 另一种map的声明方式
+	numbers = make(map[string]int)
+	numbers["one"] = 1  //赋值
+	numbers["ten"] = 10 //赋值
+	numbers["three"] = 3
+    //左边列是key，右边列是值
+	fmt.Println("第三个数字是: ", numbers["three"]) // 读取数据
+	// 打印出来如:第三个数字是: 3
+
+	fmt.Println("这个map集合的长度是多少 ====", len(numbers))
+
+	var shiming = make(map[int]int)
+	shiming[1]=1
+	shiming[1]=1//不可以存入相同的key值，存入的话，等于说是没有存入的
+	shiming[44]=112
+	shiming[15]=12
+	shiming[10]=12
+	shiming[2]=12
+	fmt.Println("shiming", shiming)
+     //   todo   无序，线程不安全，key值唯一
+	//使用map过程中需要注意的几点：
+	//
+	//map是无序的，每次打印出来的map都会不一样，它不能通过index获取，而必须通过key获取
+	//map的长度是不固定的，也就是和slice一样，也是一种引用类型
+	//内置的len函数同样适用于map，返回map拥有的key的数量
+	//map的值可以很方便的修改，通过numbers["one"]=11可以很容易的把key为one的字典值改为11
+	//map和其他基本型别不同，它不是thread-safe，在多个go-routine存取时，必须使用mutex lock机制
+      //   todo   这里不太明白   ---  》
+     //map的初始化可以通过key:val的方式初始化值，同时map内置有判断是否存在key的方式
+
+
+
+     //通过delete删除map的元素：
+	// 初始化一个字典
+	rating := map[string]float32{"C":5, "Go":4.5, "Python":4.5, "C++":2 }
+	// map有两个返回值，第一个返回值是指的是这个key对应的value的值，第二个返回值，如果不存在key，那么ok为false，如果存在ok为true
+	csharpRating, ok := rating["C#"]
+	csharpRating1, ok1 := rating["C"]
+	csharpRating2, ok2 := rating["Python"]
+	fmt.Println("map的第二个返回值csharpRating====",csharpRating,"ok===",ok)
+	fmt.Println("map的第二个返回值 csharpRating1====",csharpRating1,ok1)
+	fmt.Println("map的第二个返回值 csharpRating2=====",csharpRating2,ok2)
+	if ok {
+		fmt.Println("C# is in the map and its rating is ", csharpRating)
+	} else {
+		fmt.Println("We have no rating associated with C# in the map")
+	}
+
+	delete(rating, "C")  // 删除key为C的元素
+
+	fmt.Println("删除了 C 这个key",rating)
+
+
+	//map也是一种引用类型，如果两个map同时指向一个底层，那么一个改变，另一个也相应的改变：
+
+	m := make(map[string]string)
+	m["Hello"] = "Bonjour"
+	m1 := m
+	fmt.Println("m1打印出来的值是多少",m1)
+	m1["Hello"] = "Salut"  // 现在m["hello"]的值已经是Salut了
+
+	fmt.Println("map是否是引用类型，它的值是否改变了",m)
 }
 
 
