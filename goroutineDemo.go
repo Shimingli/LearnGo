@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"runtime"
+	"time"
 )
 //并发
 func init() {
@@ -53,7 +54,118 @@ func main() {
 
      //Range和Close   ---->Demo
      rangeAndCloseDemo()
+
+     //多个channel 的情况，Go提供了一个关键字 select ，通过select可以监听 channel 上的数据流动
+
+     selectDemo()
+
+    //超时
+    //有时候会出现goroutine阻塞的情况，那么我们如何避免整个程序进入阻塞的情况呢？我们可以利用select来设置超时，通过如下的方式实现：
+    caoShiDemo()
+
+
+
+	 //runtime goroutine
+	//runtime包中有几个处理goroutine的函数：
+	//runtime.Goexit()
+	//Goexit
+	//退出当前执行的goroutine，但是defer函数还会继续调用
+	 //runtime.Gosched()
+	//Gosched
+	//让出当前goroutine的执行权限，调度器安排其他等待的任务运行，并在下次某个时候从该位置恢复执行。
+	 var numcpu=runtime.NumCPU()
+	 println("numcpu==返回 CPU 核数量",numcpu)
+	//NumCPU
+	//返回 CPU 核数量
+	 var numgoroutine=runtime.NumGoroutine()
+	 println("返回正在执行和排队的任务总数",numgoroutine)
+	//NumGoroutine
+	//返回正在执行和排队的任务总数
+	//runtime.GOMAXPROCS()
+	//GOMAXPROCS
+	//用来设置可以并行计算的CPU核数的最大值，并返回之前的值。
+
 }
+func caoShiDemo() {
+	c := make(chan int)
+	o := make(chan bool)
+    //o<-false
+    //fmt.Println("打印出来---》",o)
+	go func() {
+		for {
+			select {
+			case v := <- c:  // 从c中接收数据，并赋值给v  如果成功的话 就打印出来
+				println(v)
+			case <- time.After(5 * time.Second):
+				println("timeout")
+				o <- true//如果把这段代码，给注释掉的话，就会报错了---》  麻痹
+				fmt.Println("0====",o)
+				break
+			}
+		}
+	}()
+	//最后的结果，打印的结果----
+	var  flag= <- o
+	fmt.Println(flag)
+
+
+
+
+}
+/**
+select 默认是阻塞的，只有当监听的 channel 中有发送或者接受可以进行时才会运动，当多个channel 都准备好了，select是随机选择一个执行的
+
+ */
+func selectDemo() {
+
+	//for true  {
+	//	fmt.Printf("这是无限循环。\n");
+	//}
+	//其实就是个无线的循环和C一样
+	//for   {
+	//	deferDemo()
+	//}
+	fmt.Println("<---------------------------------->")
+	c := make(chan int)
+	quit := make(chan int)
+	go func() {
+		for i := 0; i < 10; i++ {
+
+			fmt.Println("for循环的结果",<-c)
+			//fmt.Println("shiming",<-c)
+		}
+		quit <- 0
+	}()
+	//<---------------------------------->
+	//c====== 0xc0420b0000
+	//quit====== 0xc0420b0060   其实下面就是两个地址  有点意思啊啊啊啊啊啊啊啊
+	fmt.Println("c======",c)
+	fmt.Println("quit======",quit)
+	fibonacciD(c, quit)
+}
+
+func fibonacciD(c, quit chan int) {
+	x,y :=1,1
+	for   {
+		fmt.Println("你要运行好多次 x= ",x,"y=",y)
+		select {
+
+		case c<- x:  //channel通过操作符<-来接收和发送数据
+
+		    fmt.Println("shiming fibonacciD",c)
+		  	x,y=y,x+y
+		case <-quit:
+			fmt.Println("quit====")
+			return
+
+		}
+	}
+
+}
+
+
+
+
 /**
   x :=<-c  //c的地址是一样的
 	fmt.Println("shiming 我感觉C会打印什么",c)
@@ -95,7 +207,7 @@ func fibonacci(n int, c chan int) {
 	for i:=0;i<n ;i++  {
 		c<- x //	c <- x  // send total to c  其实发送的是地址
 		fmt.Println("x=",x,"y=",y)
-		x,y=y,x+y//草拟吗  你看不清除这个预算符号么 ，麻痹
+		x,y = y,x+y//草拟吗  你看不清除这个预算符号么 ，麻痹
 		fmt.Println(x,y)
 	}
 	close(c)
