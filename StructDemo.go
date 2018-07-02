@@ -1,9 +1,11 @@
 package main
 
 import "fmt"
-
+/**
+Go语言中，也和C或者其他语言一样，我们可以声明新的类型，作为其它类型的属性或字段的容器。例如，我们可以创建一个自定义类型person代表一个人的实体。这个实体拥有属性：姓名和年龄。这样的类型我们称之struct。
+ */
 func init() {
-   fmt.Println("init 开始执行")
+   fmt.Println("init 开始执行   Go语言中，也和C或者其他语言一样，我们可以声明新的类型，作为其它类型的属性或字段的容器。例如，我们可以创建一个自定义类型person代表一个人的实体。这个实体拥有属性：姓名和年龄。这样的类型我们称之struct。  " )
    structDemo()
 }
 func structDemo() {

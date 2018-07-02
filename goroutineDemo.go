@@ -123,7 +123,7 @@ func selectDemo() {
 	//}
 	//其实就是个无线的循环和C一样
 	//for   {
-	//	deferDemo()
+
 	//}
 	fmt.Println("<---------------------------------->")
 	c := make(chan int)

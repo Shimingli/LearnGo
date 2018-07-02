@@ -267,13 +267,13 @@ func deferDemo() {
 
 	//如果有很多调用defer，那么defer是采用后进先出模式，所以如下代码会输出4 3 2 1 0
 	for i := 0; i < 5; i++ {
-		defer fmt.Printf("%d ", i)  //执行的时候，有点晚啊啊啊啊啊
+		defer fmt.Printf("--------->>>>>>%d ", i)  //执行的时候，有点晚啊啊啊啊啊
 		if i==4 {
 			fmt.Println()
 		}
 	}
 	for i := 0; i < 5; i++ {
-		fmt.Printf("%d ", i)
+		fmt.Printf("------------>>>%d ", i)
 	}
 	fmt.Println("fdfd")
 	fmt.Println("我会去先自行，然后后面的才会慢慢的去自行")
