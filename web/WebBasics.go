@@ -1,4 +1,4 @@
-package web
+package main
 
 func init() {
 	// 如何使用 go来编写 web应用，go目前已经有了成熟的http处理包，这使得编写能够做任何事情的动态的Web程序易于反掌
