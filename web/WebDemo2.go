@@ -20,10 +20,10 @@ func init() {
 
 
 }
+
+//go如何使得Web工作
 func main() {
       fmt.Println(" 注意查看图3.3http.png 的图")
-
-
       /*
       Go实现Web服务的工作模式的流程图
       http包执行的流程
