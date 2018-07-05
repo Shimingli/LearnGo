@@ -63,7 +63,7 @@ type FileHeader struct {
 		fmt.Println("handler.Header=",handler.Header)
 		fmt.Fprintf(w, "%v", handler.Header)
 		// 这个 test文件夹是我自己创建的 这样就可以通过 上传上来了
-		f, err := os.OpenFile("./test/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)  // 此处假设当前目录下已存在test目录
+		f, err := os.OpenFile("./uploadfile/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)  // 此处假设当前目录下已存在test目录
 		if err != nil {
 			fmt.Println(err)
 			return
