@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	//其实这个就是Go设计的巧妙之处，我们在变量赋值的时候经常看到这个符号，它是用来忽略变量赋值的占位符，那么包引入用到这个符号也是相似的作用，这儿使用_的意思是引入后面的包名而不直接使用这个包中定义的函数，变量等资源。
+
 )
 
 func init() {
@@ -38,15 +38,18 @@ func main() {
 	//插入数据 db.Prepare()函数用来返回准备要执行的sql操作，然后返回准备完毕的执行状态。
 	stmt, err := db.Prepare("INSERT userinfo SET username=?,department=?,created=?")
 	checkErr(err)
-
-	for i:=1;i<100000 ;i++  {
-		//stmt.Exec()函数用来执行stmt准备好的SQL语句
-		res, err := stmt.Exec("shiming", "研发部门", "20180706")
-		checkErr(err)
-		//shiming i== 9727 res=== {0xc0420a0000 0xc0422f5000}
-		fmt.Println("shiming i==",i,"res===",res)
-
-	}
+	//var s []string
+	//for i:=1;i<100 ;i++  {
+	//	//stmt.Exec()函数用来执行stmt准备好的SQL语句
+	//	//s:="研发部门--i"
+	//	var s []string
+	//	s = append(s, strconv.Itoa(i),"研发部门--i====")
+	//	res, err := stmt.Exec("shiming",strings.Join(s,strconv.Itoa(i)) , "20180709")
+	//	checkErr(err)
+	//	//shiming i== 9727 res=== {0xc0420a0000 0xc0422f5000}
+	//	fmt.Println("shiming i==",i,"res===",res)
+	//
+	//}
 	res, err := stmt.Exec("shiming", "研发部门", "20180706")
 	checkErr(err)
 
@@ -84,16 +87,21 @@ func main() {
 	}
 
 	//删除数据
-	//stmt, err = db.Prepare("delete from userinfo where uid=?")
-	//checkErr(err)
-	//
-	//res, err = stmt.Exec(id)
-	//checkErr(err)
-	//
-	//affect, err = res.RowsAffected()
-	//checkErr(err)
+    stmt, err = db.Prepare("delete from userinfo where uid=?")
+	checkErr(err)
+     //stmt.Exec()函数用来执行stmt准备好的SQL语句
+	res, err = stmt.Exec(id)
+	checkErr(err)
+	//RowsAffected 返回受更新、插入或删除影响的行数。并非每个数据库或数据库驱动程序都可以支持这一点。
+	affect, err = res.RowsAffected()
+	checkErr(err)
 	//
 	//fmt.Println(affect)
+    //  todo  删除数据库
+	res, err = db.Exec("DELETE  FROM userinfo WHERE  username = ?", "shiming")
+	fmt.Println(res)
+	id,err = res.LastInsertId()
+	fmt.Println("删除数据的id==",id)
 
 	db.Close()
 
