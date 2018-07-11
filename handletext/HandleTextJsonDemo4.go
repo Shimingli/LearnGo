@@ -39,6 +39,9 @@ func main() {
 	//Channel, complex和function是不能被编码成JSON的
 	//嵌套的数据是不能编码的，不然会让JSON编码进入死循环
 	//指针在编码的时候会输出指针指向的内容，而空指针会输出null
+
+
+
 }
 type ServerJsonD struct {
 	//ServerName string
