@@ -46,6 +46,10 @@ func main() {
 	readFileDemo()
 
 
+	//Go语言里面删除文件和删除文件夹是同一个函数
+	//func Remove(name string) Error
+	//调用该函数就可以删除文件名为name的文件
+
 }
 func readFileDemo() {
 	fl,error:=os.Open("shiming11.text")
