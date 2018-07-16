@@ -295,8 +295,8 @@ func sliceDemo() {
 	aSlice = array[5:] // 等价于aSlice = array[5:10] aSlice包含元素: f,g,h,i,j
 	fmt.Println(aSlice)//[102 103 104 105 106]  截取角标5后面的数组，包括角标5的数字
 
-	aSlice = array[:]  // 等价于aSlice = array[0:10] 这样aSlice包含了全部的元素
-	fmt.Println(aSlice)//[97 98 99 100 101 102 103 104 105 106]
+	aSlice = array[0:]  // 等价于aSlice = array[0:10] 这样aSlice包含了全部的元素
+	fmt.Println("aSlice====",aSlice)//[97 98 99 100 101 102 103 104 105 106]
 	// 从slice中获取slice
 	aSlice = array[3:7]  // aSlice包含元素: d,e,f,g，len=4，cap=7
 	fmt.Println(aSlice)//[100 101 102 103]含头不含尾巴

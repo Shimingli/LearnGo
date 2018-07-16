@@ -19,7 +19,7 @@ func main() {
 	 //具体就是 调用的 是    server.go  中的Handle方法
 	http.HandleFunc("/",sayHelloName)
 	//设置监听的端口
-	 err:= http.ListenAndServe(":9090",nil)
+	 err:= http.ListenAndServe(":7777",nil)
 	if err!=nil {
 		log.Fatal("ListenAndServe",err)
 	}
