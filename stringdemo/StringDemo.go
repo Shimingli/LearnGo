@@ -77,10 +77,66 @@ func main() {
 
 
 	strconvDemo()
+
+    //Parse 系列函数把字符串转换为其他类型
+	ParseDemo()
+}
+func ParseDemo() {
+	a, err := strconv.ParseBool("false")
+	checkError(err)
+	b, err := strconv.ParseFloat("123.23", 64)
+	checkError(err)
+	c, err := strconv.ParseInt("1234", 10, 64)
+	checkError(err)
+	d, err := strconv.ParseUint("12345", 10, 64)
+	checkError(err)
+	e, err := strconv.Atoi("1023")
+	checkError(err)
+	fmt.Println(a, b, c, d, e)
+}
+func checkError(e error) {
+	if e != nil{
+		fmt.Println(e)
+	}
 }
 // 字符串的转换
 func strconvDemo() {
+
+	// 卧槽  有点意思啊
 	str:=make([]byte,0,100)
-	strconv.
+	//Append 系列函数将整数等转换为字符串后，添加到现有的字节数组中。
+	//追加整数的字符串形式，
+	str=strconv.AppendInt(str,5,10)
+	fmt.Println("*************** shiming ************")
+	fmt.Println("111==========",string(str))
+    str=strconv.AppendBool(str,false)
+    fmt.Println(string(str))
+	str = strconv.AppendQuote(str, "abcdefg")
+	str = strconv.AppendQuoteRune(str, '单')
+	fmt.Println(string(str))
+
+
+   //Format 系列函数把其他类型的转换为字符串
+	a:= strconv.FormatBool(false)
+	fmt.Println(a)
+	/*
+	bitSize 只能是 32  或者是  64   要不然会抛出恐慌   panic
+	这个我感觉 很是尴尬啊
+	 */
+	b:=strconv.FormatFloat(1111111111111123.1211111111111111111111113,'g',12,64)
+	fmt.Println(b)
+
+    //4d2  16 进制的值   后面的是多少进制的意思   没有1进制  最少是2进制 ，注意会爆出恐慌
+	c:=strconv.FormatInt(1234,16)
+    fmt.Println(c)
+    //for 2 <= base <= 36. 感觉和上面的是一样的  如果进制正确的话
+	d:=strconv.FormatUint(1234,16)
+    fmt.Println(d)
+
+	//Parse 系列函数把字符串转化为其他的类型
+
+	a1,_ := strconv.ParseBool("false")
+	fmt.Println(a1)
+
 
 }
