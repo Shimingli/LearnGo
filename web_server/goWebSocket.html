@@ -1,0 +1,48 @@
+<html>
+<head>
+    <title>好好学习</title>
+</head>
+<body>
+<script type="text/javascript">
+    var sock = null;
+    // var wsuri = "wss://127.0.0.1:8080"; //本地的地址 是可以改变的哦
+     var wsuri = "ws://localhost:8080/shiming"; //本地的地址 是可以改变的哦
+
+
+    window.onload = function() {
+        //可以看到客户端JS，很容易的就通过WebSocket函数建立了一个与服务器的连接sock，当握手成功后，会触发WebScoket对象的onopen事件，告诉客户端连接已经成功建立。客户端一共绑定了四个事件。
+        console.log("开始了 onload");
+
+        sock = new WebSocket(wsuri);
+        //建立连接后触发
+        sock.onopen = function() {
+            console.log(" 建立连接后触发 connected to " + wsuri);
+        }
+        // 关闭连接时候触发
+        sock.onclose = function(e) {
+            console.log("关闭连接时候触发 connection closed (" + e.code + ")");
+        }
+        // 收到消息后触发
+        sock.onmessage = function(e) {
+            console.log("收到消息后触发 message received: " + e.data);
+        }
+        //发生错误的时候触发
+        sock.onerror=function (e) {
+            console.log("发生错误时候触发"+wsuri)
+        }
+    };
+     //如果sock被关闭掉了 这里 也会报错的啊
+    function send() {
+        var msg = document.getElementById('message').value;
+        sock.send(msg);
+    };
+</script>
+<h1>GoWebSocketDemo</h1>
+<form>
+    <p>
+        Message: <input id="message" type="text" value="你好啊  shiming 小哥哥  嘿嘿   ">
+    </p>
+</form>
+<button onclick="send();">给服务器发送消息</button>
+</body>
+</html>
