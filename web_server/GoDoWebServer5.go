@@ -6,6 +6,7 @@ import (
     //草拟吗 自己创建的目录 哈哈哈哈哈    还好我比较聪明  要不然 就完蛋了  麻痹
 	"golang.org/x/net/websocket"
 	"log"
+	"strconv"
 )
 
 func main() {
@@ -22,6 +23,7 @@ func main() {
 
 func Echo(w *websocket.Conn)  {
     var error error
+    var i  int
 	for   {
 		var reply string
 		if  error= websocket.Message.Receive(w,&reply);error!=nil{
@@ -29,17 +31,18 @@ func Echo(w *websocket.Conn)  {
 			break
 		}
 		fmt.Println("能够接受到消息了--- ",reply)
+        i++
+
 		msg:="我已经收到消息 Received:"+reply
+
 		//  连接的话 只能是   string；类型的啊
 		fmt.Println("发给客户端的消息： "+msg)
-
-		if error = websocket.Message.Send(w, msg); error != nil {
+        strconv.Itoa(i)
+		strconv.FormatInt(int64(i),10)
+		if error = websocket.Message.Send(w, msg+"第几次了啊i===="+ strconv.Itoa(i)); error != nil {
 			fmt.Println("不能够发送消息 悲催哦")
 			break
 		}
-
-
-
 
 	}
 
