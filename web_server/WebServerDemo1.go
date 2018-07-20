@@ -22,9 +22,9 @@ func main() {
 	//REST
 	// RPC
 
-
-
-
-
+	// Socket编程，现在的网络正在向着云的方向快速进化，技术演化的基石是 Socket
+	// HTML5  一个重要的 特性是 WebSocket ，通过它 ，可以主动地push下坡熊，以简化ajax轮询的模式
+	// REST 编写模式，特别适合来开发网络应用的API ，目前移动应用的快速的发展，这个一个潮流
+	// Go RPC 实现RPC的相关的知识
 
 }
