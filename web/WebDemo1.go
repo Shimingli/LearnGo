@@ -47,6 +47,7 @@ func sayHelloName(w http.ResponseWriter,r *http.Request)  {
      fmt.Println("r.Form====",r.Form)//r.Form==== map[url_long:[111] url_long11:[222]]
      fmt.Println("path===",r.URL.Path)//path=== /
      fmt.Println("scheme====",r.URL.Scheme)//scheme====
+
      fmt.Println(r.Form["url_long"])//[111] 这个的意思，就是把key=url_long的值取出来
     //遍历一下 这个 map里面的 东西,里面没有这个东西的话，就会不会解析
 	for k,v:= range  r.Form  {
