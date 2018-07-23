@@ -59,6 +59,7 @@ func cookieDemo(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("打印的方法：method",r.Method)
 	fmt.Println("打印的方法：r.Form",r.Form)
 	//session和cookie的目的相同，都是为了克服http协议无状态的缺陷，但完成的方法不同。session通过cookie，在客户端保存session id，而将用户的其他会话消息保存在服务端的session对象中，与此相对的，cookie需要将所有信息都保存在客户端。因此cookie存在着一定的安全隐患，例如本地cookie中保存的用户名密码被破译，或cookie被其他网站收集（例如：1. appA主动设置域B cookie，让域B cookie获取；2. XSS，在appA上通过javascript获取document.cookie，并传递给自己的appB）。
+
 	if r.Method=="GET" {
 		crutime := time.Now().Unix()
 		h := md5.New()
@@ -76,7 +77,6 @@ func cookieDemo(w http.ResponseWriter, r *http.Request) {
 	}else {
 		r.ParseForm() //这一行代码有点意思  加上我这里才会输出  有点意思哦
 		//请求的是登录的数据，那么执行登录的逻辑
-
 		cookie, _ := r.Cookie("cookie")
 		fmt.Fprint(w, cookie)
 		fmt.Println("得到的cooklie是==",cookie)
