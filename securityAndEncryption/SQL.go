@@ -86,4 +86,6 @@ func SQLDemo(w http.ResponseWriter,r *http.Request)  {
 
 
 
+	//SQL注入是危害相当大的安全漏洞。所以对于我们平常编写的Web应用，应该对于每一个小细节都要非常重视，细节决定命运
+
 }
