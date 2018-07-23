@@ -35,6 +35,7 @@ func main() {
 	db, err := sql.Open("mysql", "root:App123@tcp(localhost:3306)/godbdemo?charset=utf8")
 	checkErr(err)
 
+
 	//插入数据 db.Prepare()函数用来返回准备要执行的sql操作，然后返回准备完毕的执行状态。
 	stmt, err := db.Prepare("INSERT userinfo SET username=?,department=?,created=?")
 	checkErr(err)

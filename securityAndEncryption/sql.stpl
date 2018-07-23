@@ -1,0 +1,12 @@
+<html>
+<head>
+	<title>token</title>
+</head>
+<body>
+<form action="/sqldemo" method="POST">
+<p> 用户名： Username: <input type="text" name="username" /></p>
+<p> 密码：Password: <input type="password" name="password" /></p>
+<p><input type="submit" value="登陆" /></p>
+</form>
+</body>
+</html>
