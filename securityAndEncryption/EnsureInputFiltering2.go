@@ -1,6 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+	"html/template"
+	"regexp"
+)
 
 func init() {
 	fmt.Println("确保输入的过滤了  过滤用户数据是Web应用安全的基础。它是验证数据合法性的过程。通过对所有的输入数据进行过滤，可以避免恶意数据在程序中被误信或误用。大多数Web应用的漏洞都是因为没有对用户输入的数据进行恰当过滤所引起的。")
@@ -45,7 +50,46 @@ func main() {
 
 
 
+    http.HandleFunc("/mapDemo",mapDemo)
+     http.ListenAndServe(":9090",nil)
+}
 
+func mapDemo(w http.ResponseWriter,r *http.Request)  {
+	fmt.Println("请求的方式",r.Method)
+    t,_:=template.ParseFiles("securityAndEncryption/test2.gtpl")
+    t.Execute(w,nil)
+    r.ParseForm()
+    name:=r.Form.Get("name")
+    fmt.Println("name=",name)
+     // 创建一个map
+     newMap:= make(map[string]string,0)
+    if name=="1"{
+    	newMap["name"]="shiming"
+	}
+	if name=="2"{
+		newMap["name"]="daming"
+	}
+	if name=="3"{
+		newMap["name"]="xiaoming"
+	}
+    fmt.Println("newMAp=",newMap)
+	var str  string
+	for key,V := range newMap{
+		fmt.Println("key=",key)
+		fmt.Println("v=",V)
+		str=V
+	}
+
+    template.HTMLEscape(w,[]byte("你选着完了，选择的内容是：name="+str))
+
+
+
+   // 数据过滤在Web安全中起到一个基石的作用，大多数的安全问题都是由于没有过滤数据和验证数据引起的
+
+     //字母和数字的组合
+     if ok,_:=regexp.MatchString("^[a-zA-Z0-9]+$","shiming");ok{
+     	fmt.Println("shiming 是否满足啊 ok=",ok)
+	 }
 
 }
 
