@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 )
-
+//  todo   https://github.com/derekparker/delve  这个也可以用来调试go 语言写的东西
 func main() {
 	//GDB调试简介
 	//GDB是FSF(自由软件基金会)发布的一个强大的类UNIX系统下的程序调试工具。使用GDB可以做如下事情：
