@@ -1,0 +1,20 @@
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>系统错误页面</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="span10">
+            <div class="hero-unit">
+                <h1>系统暂时不可用!</h1>
+                <p>{{.ErrorInfo}}</p>
+            </div>
+        </div><!--/span-->
+    </div>
+</div>
+</body>
+</html>
