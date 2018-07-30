@@ -1,7 +1,8 @@
 
 # GoDemo <img src="http://i.imgur.com/hTeVwmJ.png" width="40" height="40" alt=":walrus:" class="emoji" title=":walrus:"/>
-## 学习go语言的Demo
-### Old 以前自学的Demo
+### Old目录-->以前学习的Demo，停止更新
+
+#### 2018.7.26 学习Deployment部署和Maintenance维护
 * 1、日记应用 尼玛逼啊！还要一个依赖：https://github.com/golang/sys 
 * 2、seelog的Demo完成
 * 3、错误的处理：panic和recover是针对自己开发package里面实现的逻辑，针对一些特殊情况来设计。
@@ -12,5 +13,5 @@
 *  9、应用部署： daemon：Go程序还不能实现daemon，详细的见这个Go语言的bug：<http://code.google.com/p/go/issues/detail?id=227>，大概的意思说很难从现有的使用的线程中fork一个出来，因为没有一种简单的方法来确保所有已经使用的线程的状态一致性问题
 * 10、Supervisord可惜啊，不支持window系统啊日了狗 
 * 11、备份和恢复
-### New20180730,重新复习一下
-#### 2018.7.26 学习Deployment部署和Maintenance维护，
+
+### New20180730目录,重新学习了一本书来了解更深刻的原理
