@@ -175,6 +175,7 @@ func rangeAndCloseDemo() {
    //注释的例子，我们需要读取两次 c ，这样不是很方便，Go考虑到了这一点，所以也可以通过 range，像操作slice或者是map一样操作缓存类型的channel，
    c:=make(chan int,10)//创建可以存储 长度10的 类型为int的 channel
    go fibonacci(cap(c),c)
+
 	v1, ok1 := <-c  /// 从c中接收数据，并赋值给v1,ok1为true 表示才有值  ，如果没有的话  ，就表示没有值，这个通道已经关闭了
 	fmt.Println("ok=",ok1,"v==",v1)//ok= true v== 1 为  true 表示有数据要返回哦
 	for i:=range c  {
