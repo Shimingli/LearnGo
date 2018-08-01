@@ -4,6 +4,11 @@ import (
 	"fmt"
 	"GoDemo/New20180730/FirstGoBase/firstpkg"
 	"GoDemo/New20180730/FirstGoBase/secondpkg"
+	"image/color"
+	"sync"
+	"io"
+	"bytes"
+	"os"
 )
 
 func init() {
@@ -29,6 +34,146 @@ func main() {
 
     defer fmt.Println("我会最后执行-----------")
 
+
+
+	method()
+
+	interfaceDemo()
+
+}
+/*
+Go语言之父Rob Pike曾说过一句名言：那些试图避免白痴行为的语言最终自己变成了白痴语言（Languages that try to disallow idiocy become themselves idiotic）。一般静态编程语言都有着严格的类型系统，这使得编译器可以深入检查程序员没有作出什么出格的举动。但是，过于严格的类型系统却会使得编程太过繁琐，让程序员把大好的青春都浪费在了和编译器的斗争中。Go语言试图让程序员能在安全和灵活的编程之间取得一个平衡。它在提供严格的类型检查的同时，通过接口类型实现了对鸭子类型的支持，使得安全动态的编程变得相对容易。
+ */
+func interfaceDemo() {
+    // 般静态编程语言都有着严格的类型系统。过于严格的编译系统，会导致编程的效率过低 ---  go在其中取得平衡
+    // 鸭子类型：当看到一只鸟走起来像鸭子、游泳起来像鸭子、叫起来也像鸭子，那么这只鸟就可以被称为鸭子
+
+
+
+	//接口在Go语言中无处不在，在“Hello world”的例子中，fmt.Printf函数的设计就是完全基于接口的，它的真正功能由fmt.Fprintf函数完成。用于表示错误的error类型更是内置的接口类型。在C语言中，printf只能将几种有限的基础数据类型打印到文件对象中。但是Go语言灵活接口特性，fmt.Fprintf却可以向任何自定义的输出流对象打印，可以打印到文件或标准输出、也可以打印到网络、甚至可以打印到一个压缩文件；同时，打印的数据也不仅仅局限于语言内置的基础类型，任意隐式满足fmt.Stringer接口的对象都可以打印，不满足fmt.Stringer接口的依然可以通过反射的技术打印。fmt.Fprintf函数的签名如下
+
+	 fmt.Printf("go go go")
+
+	//func Fprintf(w io.Writer, format string, args ...interface{}) (int, error)
+	//其中io.Writer用于输出的接口，error是内置的错误接口，它们的定义如下：
+	//
+	//type io.Writer interface {
+	//Write(p []byte) (n int, err error)
+	//}
+	//
+	//type error interface {
+	//Error() string
+	//}
+
+	//   todo  定制自己的输出对象，将每个字符转化为大写的字符
+    fmt.Println()
+    fmt.Fprintln(&UpWriter{os.Stdout},"shi , ming")
+    fmt.Println("[]byte{'s','m'}====",string(bytes.ToUpper([]byte{'s','m'})))
+	//SHI , MING
+	//[]byte{'s','m'}==== SM
+
+
+	 //  我们也可以定义自己的打印格式来实现将每个字符转为大写字符后输出的效果。对于每个要打印的对象，如果满足了fmt.Stringer接口，则默认使用对象的String方法返回的结果打印
+
+
+
+
+}
+
+//type UpperString string
+//
+//type fmt.Stringer interface{
+//	String() string
+//}
+//
+//func (s UpperString) string() string {
+//    return strings.ToUpper(string(s))
+//}
+
+
+
+type UpWriter struct {
+	io.Writer
+}
+//  todo 如果把大小写写错了  比如说把 Write 写成 write的话！  是不会输入正确的-----！！！
+func (p *UpWriter) Write(data []byte) (n int,err error){
+	return p.Writer.Write(bytes.ToUpper(data))
+}
+
+
+
+
+
+
+
+
+
+/*
+OOP: Object Oriented Programming,面向对象的程序设计。所谓“对象”在显式支持面向对象的语言中，一般是指类在内存中装载的实例，具有相关的成员变量和成员函数（也称为：方法）。面向对象的程序设计完全不同于传统的面向过程程序设计，它大大地降低了软件开发的难度，使编程就像搭积木一样简单，是当今电脑编程的一股势不可挡的潮流。 方法一般是面向对象编程(OOP)的一个特性
+ */
+func method() {
+    // todo oop(面向对象的程序设计)  1、封装 2、继承 3、多态 4、抽象
+
+	//Go语言中的做法是，将CloseFile和ReadFile函数的第一个参数移动到函数名的开头：
+	//
+	//// 关闭文件
+	//func (f *File) CloseFile() error {
+	//// ...
+	//}
+	//
+	//// 读文件数据
+	//func (f *File) ReadFile(int64 offset, data []byte) int {
+	//// ...
+	//}
+
+	//CloseFile和ReadFile函数就成了File类型独有的方法了（而不是File对象方法）。它们也不再占用包级空间中的名字资源，同时File类型已经明确了它们操作对象，因此方法名字一般简化为Close和Read
+
+	//// 关闭文件
+	//func (f *File) Close() error {
+	//// ...
+	//}
+	//
+	//// 读文件数据
+	//func (f *File) Read(int64 offset, data []byte) int {
+	//// ...
+	//}
+
+
+	//Go语言不仅支持传统面向对象中的继承特性，而是以自己特有的组合方式支持了方法的继承。Go语言中，通过在结构体内置匿名的成员来实现继承
+
+
+	type Point struct{ X, Y float64 }
+
+	type ColoredPoint struct {
+		Point
+		Color color.RGBA
+	}
+   //虽然我们可以将ColoredPoint定义为一个有三个字段的扁平结构的结构体，但是我们这里将Point嵌入到ColoredPoint来提供X和Y这两个字段
+	var cp ColoredPoint
+	cp.X = 1
+	fmt.Println("cp.Point.X=",cp.Point.X) // "1"
+	cp.Point.Y = 2
+	fmt.Println(cp.Y)       // "2"
+
+	//通过嵌入匿名的成员，我们不仅可以继承匿名成员的内部成员，而且可以继承匿名成员类型所对应的方法。我们一般会将Point看作基类，把ColoredPoint看作是它的继承类或子类。不过这种方式继承的方法并不能实现C++中虚函数的多态特性。所有继承来的方法的接收者参数依然是那个匿名成员本身，而不是当前的变量
+
+
+	//在传统的面向对象语言(eg.C++或Java)的继承中，子类的方法是在运行时动态绑定到对象的，因此基类实现的某些方法看到的this可能不是基类类型对应的对象，这个特性会导致基类方法运行的不确定性。而在Go语言通过嵌入匿名的成员来“继承”的基类方法，this就是实现该方法的类型的对象，Go语言中方法是编译时静态绑定的。如果需要虚函数的多态特性，我们需要借助Go语言接口来实现
+
+}
+//Cache结构体类型通过嵌入一个匿名的sync.Mutex来继承它的Lock和Unlock方法
+type Cache struct {
+	m map[string]string
+	sync.Mutex
+}
+func (p *Cache) Lookup(key string) string {
+
+	//但是在调用p.Lock()和p.Unlock()时, p并不是Lock和Unlock方法的真正接收者, 而是会将它们展开为p.Mutex.Lock()和p.Mutex.Unlock()调用. 这种展开是编译期完成的, 并没有运行时代价
+	p.Lock()
+	defer p.Unlock()
+    //在传统的面向对象语言(eg.C++或Java)的继承中，子类的方法是在运行时动态绑定到对象的，因此基类实现的某些方法看到的this可能不是基类类型对应的对象，这个特性会导致基类方法运行的不确定性。而在Go语言通过嵌入匿名的成员来“继承”的基类方法，this就是实现该方法的类型的对象，Go语言中方法是编译时静态绑定的。如果需要虚函数的多态特性，我们需要借助Go语言接口来实现
+
+	return p.m[key]
 }
 /*
 
