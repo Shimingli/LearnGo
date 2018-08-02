@@ -9,6 +9,7 @@ import (
 	"time"
 	"GoDemo/New20180730/FirstGoBase/pubsub"
 	"strings"
+	"context"
 )
 
 func init() {
@@ -25,12 +26,353 @@ func main() {
 
 	concurrencyHelloWorld()
 
-	//生产者和消费者的模型
-	//producerAndConsumerModel()
+
 
 
 	//发布订阅模型
 	publishAndSubscribe()
+
+
+	//控制并发数
+	ControlConcurrencyNumber()
+
+
+
+	//赢者为王
+	winnerisKing()
+
+
+   // 素数筛  质数（prime number）又称素数，有无限个。 质数定义为在大于1的自然数中，除了1和它本身以外不再有其他因数。
+   primeNumberScreen()
+
+
+	//生产者和消费者的模型   为了更好地演示Demo 把这个给注释掉了
+	//producerAndConsumerModel()
+    //并发的安全退出
+	concurrentSecurityExit()
+	//我们通过close来关闭cancel管道向多个Goroutine广播退出的指令。不过这个程序依然不够稳健：当每个Goroutine收到退出指令退出时一般会进行一定的清理工作，但是退出的清理工作并不能保证被完成，因为main线程并没有等待各个工作Goroutine退出工作完成的机制。我们可以结合sync.WaitGroup来改进
+  //现在每个工作者并发体的创建、运行、暂停和退出都是在main函数的安全控制之下了
+	//concurrentSecurityExitMoreGood()
+
+
+	//可以用context包来重新实现前面的线程安全退出或超时的控制
+	//Go1.7发布时，标准库增加了一个context包，用来简化对于处理单个请求的多个Goroutine之间与请求域的数据、超时和退出等操作
+	contextDemo()
+
+
+       //Go语言是带内存自动回收的特性，因此内存一般不会泄漏。在前面素数筛的例子中，GenerateNatural和PrimeFilter函数内部都启动了新的Goroutine，当main函数不再使用管道时后台Goroutine有泄漏的风险。我们可以通过context包来避免这个问题，下面是改进的素数筛实现
+    contextDemo2()
+
+}
+
+func contextDemo2() {
+	// 通过 Context 控制后台Goroutine状态
+	ctx, cancel := context.WithCancel(context.Background())
+     //当main函数完成工作前，通过调用cancel()来通知后台Goroutine退出，这样就避免了Goroutine的泄漏
+	ch := GenerateNaturalTwo(ctx) // 自然数序列: 2, 3, 4, ...
+	for i := 0; i < 100; i++ {
+		prime := <-ch // 新出现的素数
+		fmt.Printf("%v: %v\n", i+1, prime)
+		ch = PrimeFilterTwo(ctx, ch, prime) // 基于新素数构造的过滤器
+	}
+	cancel()
+}
+
+// 返回生成自然数序列的管道: 2, 3, 4, ...
+func GenerateNaturalTwo(ctx context.Context) chan int {
+	ch := make(chan int)
+	go func() {
+		for i := 2; ; i++ {
+			select {
+			case <- ctx.Done():
+				return
+			case ch <- i:
+			}
+		}
+	}()
+	return ch
+}
+
+// 管道过滤器: 删除能被素数整除的数
+func PrimeFilterTwo(ctx context.Context, in <-chan int, prime int) chan int {
+	out := make(chan int)
+	go func() {
+		for {
+			if i := <-in; i%prime != 0 {
+				select {
+				case <- ctx.Done():
+					return
+				case out <- i:
+				}
+			}
+		}
+	}()
+	return out
+}
+
+func contextDemo() {
+	//当并发体超时或main主动停止工作者Goroutine时，每个工作者都可以安全退出
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+
+	var wg sync.WaitGroup
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go workerContext(ctx, &wg)
+	}
+
+	time.Sleep(time.Second)
+	cancel()
+
+	wg.Wait()
+}
+
+func workerContext(ctx context.Context, wg *sync.WaitGroup) error {
+	defer wg.Done()
+
+	for {
+		select {
+		default:
+			fmt.Println("hello  workerContext  ")
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	}
+}
+
+
+
+
+
+func concurrentSecurityExitMoreGood() {
+	cancel := make(chan bool)
+	var wg sync.WaitGroup
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go workerMoreGood(&wg, cancel)
+	}
+	time.Sleep(time.Second)
+	close(cancel)
+	wg.Wait()
+}
+func workerMoreGood(wg *sync.WaitGroup, cannel chan bool) {
+	defer wg.Done()
+     i:=0
+	for {
+		select {
+		default:
+			fmt.Println("我在工作哦")
+		case <-cannel:
+			i++
+			fmt.Println("我没有工作了哦      --",i)
+			return
+		}
+	}
+}
+
+
+/*
+有时候我们需要通知goroutine停止它正在干的事情，特别是当它工作在错误的方向上的时候。Go语言并没有提供在一个直接终止Goroutine的方法，由于这样会导致goroutine之间的共享变量落在未定义的状态上。但是如果我们想要退出两个或者任意多个Goroutine怎么办呢？
+Go语言中不同Goroutine之间主要依靠管道进行通信和同步。要同时处理多个管道的发送或接收操作，我们需要使用select关键字（这个关键字和网络编程中的select函数的行为类似）。当select有多个分支时，会随机选择一个可用的管道分支，如果没有可用的管道分支则选择default分支，否则会一直保存阻塞状态
+ */
+func concurrentSecurityExit() {
+	//基于select实现的管道的超时判断
+	//select {
+	//case v := <-in:
+	//	fmt.Println(v)
+	//case <-time.After(time.Second):
+	//	return // 超时
+	//}
+
+
+	//通过select的default分支实现非阻塞的管道发送或接收操作：
+
+	//select {
+	//case v := <-in:
+	//	fmt.Println(v)
+	//default:
+	//	// 没有数据
+	//}
+
+	//通过select来阻止main函数退出：
+		// do some thins
+		//select{}
+
+	//当有多个管道均可操作时，select会随机选择一个管道。基于该特性我们可以用select实现一个生成随机数列的程序：
+	//ch := make(chan int)
+	//go func() {
+	//	for {
+	//		select {
+	//
+	//		case ch <- 0: //从c中接收数据，并赋值给v  如果成功的话 就打印出来 v := <- c
+	//			fmt.Println()
+	//		case ch <- 1:
+	//		}
+	//	}
+	//}()
+	////安全的退出并发---》 0
+	////安全的退出并发---》 1
+	//for v := range ch {
+	//	fmt.Println("安全的退出并发---》",v)
+	//}
+
+
+
+
+	//cannel1 := make(chan bool)
+	//go workerd(cannel1)
+	//
+	//time.Sleep(time.Second)
+	//cannel1 <- true
+
+	//但是管道的发送操作和接收操作是一一对应的，如果要停止多个Goroutine那么可能需要创建同样数量的管道，这个代价太大了。其实我们可以通过close关闭一个管道来实现广播的效果，所有从关闭管道接收的操作均会收到一个零值和一个可选的失败标志。
+	//cancelTwoTwo := make(chan bool)
+	//
+	//for i := 0; i < 10; i++ {
+	//	go workerTwoT(cancelTwoTwo)
+	//}
+	//time.Sleep(time.Second)
+	//close(cancelTwoTwo)
+}
+
+func workerTwoT(cannel chan bool) {
+	for {
+		select {
+		default:
+			fmt.Println("我在工作哦")
+			// 正常工作
+		case <-cannel:
+			fmt.Println("让我好好的退出下哈哈")
+			// 退出
+		}
+	}
+}
+
+//我们通过select和default分支可以很容易实现一个Goroutine的退出控制:
+func workerd(cannel chan bool) {
+	for {
+		select {
+		default:
+			fmt.Println("hello")
+			// 正常工作
+		case <-cannel:
+			// 退出
+		}
+	}
+}
+
+
+//并发版本的素数筛是一个经典的并发例子，通过它我们可以更深刻地理解Go语言的并发特性
+func primeNumberScreen() {
+	var primeInt [10000]int
+	// 返回生成自然数序列的管道: 2, 3, 4, ...
+	ch:=GenerateNatural()
+	//不能乱结束啊 草 你结束了这个管道 ，后面的输入的就会有问题啊
+    //fmt.Println("ch=",<-ch)
+	for i := 0; i < 10000; i++ {
+		prime := <-ch // 新出现的素数
+		fmt.Println("第",i+1,"次循环,prime的值是=",prime)
+		//str:=strconv.Itoa(i+1)
+		primeInt[i]=prime
+		fmt.Printf("%v: %v\n", i+1, prime)
+		ch = PrimeFilter(ch, prime) // 基于新素数构造的过滤器
+	}
+
+
+	fmt.Println(primeInt)
+
+
+}
+
+//然后是为每个素数构造一个筛子：将输入序列中是素数倍数的数提出，并返回新的序列，是一个新的管道
+//管道过滤，删除能被素数整除的数
+func PrimeFilter(in <-chan int,prime int)  chan int{
+    out :=make(chan int)
+    go func() {
+    	for  {
+    		//第一次进来 i=2
+    		if i:= <-in;i%prime!=0{
+    			out<-i
+			}
+		}
+	}()
+    //fmt.Println("返回回去的值====",<-out)
+    return out
+
+}
+
+
+
+//需要先生成最初的自然数序列，不包含 0 和 1
+//GenerateNatural函数内部启动一个Goroutine生产序列，返回对应的管道。
+func GenerateNatural() chan int{
+	ch:=make(chan int)
+	go func() {
+		for i:=2;;i++{
+			ch <-i
+		}
+	}()
+	return ch
+}
+
+
+
+
+/*
+采用并发编程的动机有很多：并发编程可以简化问题，比如一类问题对应一个处理线程会更简单；并发编程还可以提升性能，在一个多核CPU上开2个线程一般会比开1个线程快一些。其实对于提升性能而言，程序并不是简单地运行速度快就表示用户体验好的；很多时候程序能快速响应用户请求才是最重要的，当没有用户请求需要处理的时候才合适处理一些低优先级的后台任务。
+ */
+func winnerisKing() {
+   //假设我们想快速地检索“golang”相关的主题，我们可能会同时打开Bing、Google或百度等多个检索引擎。当某个检索最先返回结果后，就可以关闭其它检索页面了。因为受限于网络环境和检索引擎算法的影响，某些检索引擎可能很快返回检索结果，某些检索引擎也可能遇到等到他们公司倒闭也没有完成检索的情况。我们可以采用类似的策略来编写这个程序
+
+
+	ch := make(chan string, 32)
+
+	go func() {
+		fmt.Println("golang")
+		ch<- "bing"
+		//ch <- searchByBing("golang")
+	}()
+	go func() {
+		fmt.Println("Google")
+		ch<- "Google"
+	//	ch <- searchByGoogle("golang")
+	}()
+	go func() {
+		fmt.Println("Baidu")
+		ch<- "Baidu"
+		//ch <- searchByBaidu("golang")
+	}()
+
+
+	/*
+	创建了一个带缓存的管道，管道的缓存数目要足够大，保证不会因为缓存的容量引起不必要的阻塞。然后我们开启了多个后台线程，分别向不同的检索引擎提交检索请求。当任意一个检索引擎最先有结果之后，都会马上将结果发到管道中（因为管道带了足够的缓存，这个过程不会阻塞）。但是最终我们只从管道取第一个结果，也就是最先返回的结果。
+通过适当开启一些冗余的线程，尝试用不同途径去解决同样的问题，最终以赢者为王的方式提升了程序的相应性能
+	 */
+	fmt.Println(<-ch)
+
+}
+/*
+很多用户在适应了Go语言强大的并发特性之后，都倾向于编写最大并发的程序，因为这样似乎可以提供最大的性能。在现实中我们行色匆匆，但有时却需要我们放慢脚步享受生活，并发的程序也是一样：有时候我们需要适当地控制并发的程度，因为这样不仅仅可给其它的应用/任务让出/预留一定的CPU资源，也可以适当降低功耗缓解电池的压力。
+ */
+func ControlConcurrencyNumber() {
+	//gatefs子包的目的就是为了控制访问该虚拟文件系统的最大并发数
+	// 其中vfs.OS("/path")基于本地文件系统构造一个虚拟的文件系统，然后gatefs.New基于现有的虚拟文件系统构造一个并发受控的虚拟文件系统
+	//fs := gatefs.New(vfs.OS("/path"), make(chan bool, 8))
+	//select 默认是阻塞的，只有当监听的 channel 中有发送或者接受可以进行时才会运动，当多个channel 都准备好了，select是随机选择一个执行的
+
+	//var limit = make(chan int, 3)
+	//
+	//func main() {
+	//	for _, w := range work {
+	//		go func() {
+	//			limit <- 1
+	//			w()
+	//			<-limit
+	//		}()
+	//	}
+	//	select{}
+	//}
+
+  //我们不仅可以控制最大的并发数目，而且可以通过带缓存Channel的使用量和最大容量比例来判断程序运行的并发率。当管道为空的时候可以认为是空闲状态，当管道满了时任务是繁忙状态，这对于后台一些低级任务的运行是有参考价值的
 
 
 
