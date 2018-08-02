@@ -3,6 +3,12 @@ package main
 import (
 	"fmt"
 	"sync"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+	"GoDemo/New20180730/FirstGoBase/pubsub"
+	"strings"
 )
 
 func init() {
@@ -19,9 +25,99 @@ func main() {
 
 	concurrencyHelloWorld()
 
+	//生产者和消费者的模型
+	//producerAndConsumerModel()
+
+
+	//发布订阅模型
+	publishAndSubscribe()
+
+
 
 
 }
+/*
+发布／订阅（publish-and-subscribe）模型通常被简写为pub／sub模型。在这个模型中，消息生产者成为发布者（publisher），而消息消费者则称对应订阅者（subscriber），生产者和消费者是M：N的关系。在传统生产者和消费者模型中，成果是将消息发送到一个队列中，而发布/订阅模型则是将消息发布给一个主题
+ */
+func publishAndSubscribe() {
+	//  构建一个发布者对象，可以设置发布的超时的时间和缓存队列的的长度
+	p := pubsub.NewPublisher(100*time.Millisecond, 10)
+	defer p.Close()
+     //添加一个新的订阅者，订阅全部的主题
+	all := p.SubscibeAll()
+	// 添加一个新的订阅者，订阅过滤器筛选后的主题
+	golang := p.SubscribeTopic(func(v interface{}) bool {
+		if s, ok := v.(string); ok {
+			return strings.Contains(s, "信息")
+		}
+		return false
+	})
+
+	p.Publish("我发布了一个信息 谁能收到")
+	p.Publish("我没有关键字 看谁能收到")
+
+	go func() {
+		for  msg := range all {
+			fmt.Println("全部接收到的信息:", msg)
+		}
+	} ()
+
+	go func() {
+		for  msg := range golang {
+			fmt.Println("包含了关键字的`信息`:", msg)
+		}
+	} ()
+
+	// 运行一定时间后退出
+	time.Sleep(3 * time.Second)
+	//在发布订阅模型中，每条消息都会传送给多个订阅者。发布者通常不会知道、也不关心哪一个订阅者正在接收主题消息。订阅者和发布者可以在运行时动态添加是一种松散的耦合关心，这使得系统的复杂性可以随时间的推移而增长。在现实生活中，不同城市的象天气预报之类的应用就可以应用这个并发模式。
+
+}
+/*
+并发编程中最常见的例子就是生产者/消费者模式，该模式主要通过平衡生产线程和消费线程的工作能力来提高程序的整体处理数据的速度。简单地说，就是生产者生产一些数据，然后放到成果队列中，同时消费者从成果队列中来取这些数据。这样就让生产消费变成了异步的两个过程。当成果队列中没有数据时，消费者就进入饥饿的等待中；而当成果队列中数据已满时，生产者则面临因产品挤压导致CPU被剥夺的下岗问题。
+ */
+func producerAndConsumerModel() {
+   ch :=make(chan int,64)
+    //启了2个Producer生产流水线，分别用于生成3和5的倍数的序列
+   go Producer(3,ch)
+   go Producer(5,ch)
+
+   go Consumer(ch)
+   //这种靠休眠方式是无法保证稳定的输出结果的
+
+   //time.Sleep(time.Second*5)
+
+   //E:\new_code\GoDemo\New20180730\FirstGoBase>go build -gcflags "-N -l" FourthCommo nConcurrencyPatterns.go
+	//todo 让main函数保存阻塞状态不退出，只有当用户输入Ctrl-C时才真正退出程序
+   sig:=make(chan os.Signal,1)
+   signal.Notify(sig,syscall.SIGINT,syscall.SIGTERM)
+   fmt.Printf("quit (%v)\n",<-sig)
+
+   //有2个生产者，并且2个生产者之间并无同步事件可参考，它们是并发的。因此，消费者输出的结果序列的顺序是不确定的，这并没有问题，生产者和消费者依然可以相互配合工作
+
+}
+//生产者 生产factor 的倍数
+func Producer(factor int,out chan <-int)  {
+	for i:=0;;i++  {
+		out<-i*factor
+	}
+}
+
+func Consumer(in <-chan int)  {
+	i:=0
+	for v :=range in{
+
+		fmt.Println("打印的 Value=",v,"in=",in)
+		i++
+		fmt.Println("输入了第几次了",i,"宝宝我爱你----")
+	}
+}
+
+
+
+
+
+
 func concurrencyHelloWorld() {
     //下面的方式 会出现异常
 	//var   mu sync.Mutex
