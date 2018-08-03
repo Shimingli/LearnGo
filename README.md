@@ -75,4 +75,6 @@
       fmt.Println(C.GoString(s))
    }
    ``` 
+   * 在Go1.10中CGO新增加了一个_GoString_预定义的C语言类型，用来表示Go语言字符串，但是由于我的是1.9.2 ，这个Demo没有成功的跑起来，所以说，这是个遗憾 
+   * 面向C接口的Go编程：主要是两个Demo: ` FourthGoProgrammingForCInterface` 和 `FourthGoProgrammingForCInterfaceBetter`
   
