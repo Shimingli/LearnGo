@@ -1,0 +1,1 @@
+void SayThirdHello(/*const*/ char* s);
