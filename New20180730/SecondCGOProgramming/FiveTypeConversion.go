@@ -1,7 +1,8 @@
 package main
 /*
 #include <stdint.h>
-
+static char arr[10];
+static char *s = "Hello";
 union B1 {
 	int i;
 	float f;
@@ -113,7 +114,71 @@ func main() {
 	sructDemo()
 
 
+	//数组、字符串和切片
+   CGODemo()
 
+
+}
+/*
+在C语言中，数组名其实对应于一个指针，指向特定类型特定长度的一段内存，但是这个指针不能被修改；当把数组名传递给一个函数时，实际上传递的是数组第一个元素的地址。为了讨论方便，我们将一段特定长度的内存统称为数组。C语言的字符串是一个char类型的数组，字符串的长度需要根据表示结尾的NULL字符的位置确定。C语言中没有切片类型。
+在Go语言中，数组是一种值类型，而且数组的长度是数组类型的一个部分。Go语言字符串对应一段长度确定的只读byte类型的内存。Go语言的切片则是一个简化版的动态数组。
+Go语言和C语言的数组、字符串和切片之间的相互转换可以简化为Go语言的切片和C语言中指向一定长度内存的指针之间的转换。
+ */
+func CGODemo() {
+	//CGO的C虚拟包提供了以下一组函数，用于Go语言和C语言之间数组和字符串的双向转换
+	// Go string to C string
+	// The C string is allocated in the C heap using malloc.
+	// It is the caller's responsibility to arrange for it to be
+	// freed, such as by calling C.free (be sure to include stdlib.h
+	// if C.free is needed).
+	//func C.CString(string) *C.char
+	//
+	//// Go []byte slice to C array
+	//// The C array is allocated in the C heap using malloc.
+	//// It is the caller's responsibility to arrange for it to be
+	//// freed, such as by calling C.free (be sure to include stdlib.h
+	//// if C.free is needed).
+	//func C.CBytes([]byte) unsafe.Pointer
+	//
+	//// C string to Go string
+	//func C.GoString(*C.char) string
+	//
+	//// C data with explicit length to Go string
+	//func C.GoStringN(*C.char, C.int) string
+	//
+	//// C data with explicit length to Go []byte
+	//func C.GoBytes(unsafe.Pointer, C.int) []byte
+
+
+	//其中C.CString针对输入的Go字符串，克隆一个C语言格式的字符串；返回的字符串由C语言的malloc函数分配，不使用时需要通过C语言的free函数释放。C.CBytes函数的功能和C.CString类似，用于从输入的Go语言字节切片克隆一个C语言版本的字节数组，同样返回的数组需要在合适的时候释放。C.GoString用于将从NULL结尾的C语言字符串克隆一个Go语言字符串。C.GoStringN是另一个字符数组克隆函数。C.GoBytes用于从C语言数组，克隆一个Go语言字节切片。
+	//
+
+	//该组辅助函数都是以克隆的方式运行。当Go语言字符串和切片向C语言转换时，克隆的内存由C语言的malloc函数分配，最终可以通过free函数释放。当C语言字符串或数组向Go语言转换时，克隆的内存由Go语言分配管理。通过该组转换函数，转换前和转换后的内存依然在各自的语言环境中，它们并没有跨越Go语言和C语言。克隆方式实现转换的优点是接口和内存管理都很简单，缺点是克隆需要分配新的内存和复制操作都会导致额外的开销。
+
+	  //  todo      不希望单独分配内存，可以在Go语言中直接访问C语言的内存空间
+
+
+	// 通过 reflect.SliceHeader 转换
+	// 通过 reflect.SliceHeader 转换
+	//var arr0 []byte
+	//var arr0Hdr = (*reflect.SliceHeader)(unsafe.Pointer(&arr0))
+	//arr0Hdr.Data = uintptr(unsafe.Pointer(&C.arr[0]))
+	//arr0Hdr.Len = 10
+	//arr0Hdr.Cap = 10
+
+	// 通过切片语法转换
+	//arr1 := (*[31]byte)(unsafe.Pointer(&C.arr[0]))[:10:10]
+	//fmt.Println("arr1",arr1)
+	//var s0 string
+	//var s0Hdr = (*reflect.StringHeader)(unsafe.Pointer(&s0))
+	//s0Hdr.Data = uintptr(unsafe.Pointer(C.s))
+	//s0Hdr.Len = int(C.strlen(C.s))
+	//
+	//sLen := int(C.strlen(C.s))
+	//s1 := string((*[31]byte)(unsafe.Pointer(&C.s[0]))[:sLen:sLen])
+	//fmt.Println("s1=",s1)
+
+	//因为Go语言的字符串是只读的，用户需要自己保证Go字符串在使用期间，底层对应的C字符串内容不会发生变化、内存不会被提前释放掉。
 
 }
 func sructDemo() {
@@ -161,4 +226,7 @@ struct A {
 	fmt.Println(C.THIRD)
 	fmt.Println(C.FOURTH)
 	fmt.Println(C.FOURTH)
+
+
+
 }
