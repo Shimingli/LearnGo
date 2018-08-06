@@ -118,7 +118,70 @@ func main() {
    CGODemo()
 
 
+  // 指针间的转换
+   pointerDemo()   // todo  image
+
+  //数值和指针的转换
+  conversionOfNumericAndPointer()
+
+   //切片间的转换
+   sliceConversion()
+
 }
+
+/*
+在C语言中数组也一种指针，因此两个不同类型数组之间到转换和指针间转换基本类似。但是在Go语言中，数组或数组对应到切片都不再是指针类型，因为我们也就无法直接实现不同类型到切片之间的转换
+不过Go语言的reflect包提供了切片类型到底层结构，再结合前面讨论到不同类型之间到指针转换技术就可以实现[]X和[]Y类型的切片转换
+ */
+func sliceConversion() {
+	//var p []X
+	//var q []Y
+	//
+	//pHdr := (*reflect.SliceHeader)(unsafe.Pointer(&p))
+	//qHdr := (*reflect.SliceHeader)(unsafe.Pointer(&q))
+	//
+	//pHdr.Data = qHdr.Data
+	//pHdr.Len = qHdr.Len * unsafe.Sizeof(q[0]) / unsafe.Sizeof(p[0])
+	//pHdr.Cap = qHdr.Cap * unsafe.Sizeof(q[0]) / unsafe.Sizeof(p[0])
+	//不同切片类型之间转换到思路是先为构造一个空的目标切片，然后用原有的切片底层数据填充目标切片。如果X和Y类型的大小不同，需要重新设置Len和Cap属性。需要注意的是，如果X或Y是空类型，上述代码中可能导致除0错误，实际代码需要根据情况酌情处理
+	//todo  image
+
+}
+
+
+func conversionOfNumericAndPointer() {
+	//为了严格控制指针的使用，Go语言禁止将数值类型直接转为指针类型！不过，Go语言针对unsafe.Pointr指针类型特别定义了一个uintptr类型。我们可以uintptr为中介，实现数值类型到unsafe.Pointr指针类型到转换。再结合前面提到的方法，就可以实现数值和指针的转换了
+
+	//转换分为几个阶段，在每个阶段实现一个小目标：首先是int32到uintptr类型，然后是uintptr到unsafe.Pointr指针类型，最后是unsafe.Pointr指针类型到*C.char类型
+   //  todo  image
+}
+
+/*
+指针间的转换
+在C语言中，不同类型的指针是可以显式或隐式转换的，如果是隐式只是会在编译时给出一些警告信息。但是Go语言对于不同类型的转换非常严格，任何C语言中可能出现的警告信息在Go语言中都可能是错误！指针是C语言的灵魂，指针间的自由转换也是cgo代码中经常要解决的第一个重要的问题
+ */
+func pointerDemo() {
+	//在Go语言中两个指针的类型完全一致则不需要转换可以直接通用。如果一个指针类型是用type命令在另一个指针类型基础之上构建的，换言之两个指针底层是相同完全结构的指针，那么我我们可以通过直接强制转换语法进行指针间的转换。但是cgo经常要面对的是2个完全不同类型的指针间的转换，原则上这种操作在纯Go语言代码是严格禁止的。
+
+
+	//cgo存在的一个目的就是打破Go语言的禁制，恢复C语言应有的指针的自由转换和指针运算。以下代码演示了如何将X类型的指针转化为Y类型的指针
+	//var p *X
+	//var q *Y
+	//q = (*Y)(unsafe.Pointer(p)) // *X => *Y
+	//p = (*X)(unsafe.Pointer(q)) // *Y => *X
+
+
+	//任何类型的指针都可以通过强制转换为unsafe.Pointer指针类型去掉原有的类型信息，然后再重新赋予新的指针类型而达到指针间的转换的目的
+
+	//unsafe.Pointer
+
+
+
+
+}
+
+
+
 /*
 在C语言中，数组名其实对应于一个指针，指向特定类型特定长度的一段内存，但是这个指针不能被修改；当把数组名传递给一个函数时，实际上传递的是数组第一个元素的地址。为了讨论方便，我们将一段特定长度的内存统称为数组。C语言的字符串是一个char类型的数组，字符串的长度需要根据表示结尾的NULL字符的位置确定。C语言中没有切片类型。
 在Go语言中，数组是一种值类型，而且数组的长度是数组类型的一个部分。Go语言字符串对应一段长度确定的只读byte类型的内存。Go语言的切片则是一个简化版的动态数组。
