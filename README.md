@@ -97,4 +97,115 @@
    float                  | C.float     | float32
    double                 | C.double    | float64
    size_t                 | C.size_t    | uint
-  
+* 2018.8.6
+   * 除了`GoInt`和`GoUint`之外，我们并不推荐直接访问`GoInt32`、`GoInt64`等类型。更好的做法是通过C语言的C99标准引入的`<stdint.h>`头文件。为了提高C语言的可移植性，在`<stdint.h>`文件中，不但每个数值类型都提供了明确内存大小，而且和Go语言的类型命名更加一致
+   
+   C语言类型 | CGO类型     | Go语言类型
+   -------- | ---------- | ---------
+   int8_t   | C.int8_t   | int8
+   uint8_t  | C.uint8_t  | uint8
+   int16_t  | C.int16_t  | int16
+   uint16_t | C.uint16_t | uint16
+   int32_t  | C.int32_t  | int32
+   uint32_t | C.uint32_t | uint32
+   int64_t  | C.int64_t  | int64
+   uint64_t | C.uint64_t | uint64
+    *  Go 字符串和切片
+    * 在CGO生成的`_cgo_export.h`头文件中还会为Go语言的字符串、切片、字典、接口和管道等特有的数据类型生成对应的C语言类型：
+      
+      ```c
+      typedef struct { const char *p; GoInt n; } GoString;
+      typedef void *GoMap;
+      typedef void *GoChan;
+      typedef struct { void *t; void *v; } GoInterface;
+      typedef struct { void *data; GoInt len; GoInt cap; } GoSlice;
+      ```
+      
+      不过需要注意的是，其中只有字符串和切片在CGO中有一定的使用价值，因为此二者可以在Go调用C语言函数时马上使用;而CGO并未针对其他的类型提供相关的辅助函数，且Go语言特有的内存模型导致我们无法保持这些由Go语言管理的内存指针，所以它们C语言环境并无使用的价值。
+      
+      在导出的C语言函数中我们可以直接使用Go字符串和切片。假设有以下两个导出函数：
+      
+      ```go
+      //export helloString
+      func helloString(s string) {}
+      
+      //export helloSlice
+      func helloSlice(s []byte) {}
+      ```
+      
+      CGO生成的`_cgo_export.h`头文件会包含以下的函数声明：
+      
+      ```c
+      extern void helloString(GoString p0);
+      extern void helloSlice(GoSlice p0);
+      ```
+      
+      不过需要注意的是，如果使用了GoString类型则会对`_cgo_export.h`头文件产生依赖，而这个头文件是动态输出的。
+      
+      Go1.10针对Go字符串增加了一个`_GoString_`预定义类型，可以降低在cgo代码中可能对`_cgo_export.h`头文件产生的循环依赖的风险。我们可以调整helloString函数的C语言声明为：
+      
+      ```c
+      extern void helloString(_GoString_ p0);
+      ```
+      
+      因为`_GoString_`是预定义类型，我们无法通过此类型直接访问字符串的长度和指针等信息。Go1.10同时也增加了以下两个函数用于获取字符串结构中的长度和指针信息：
+      
+      ```c
+      size_t _GoStringLen(_GoString_ s);
+      const char *_GoStringPtr(_GoString_ s);
+      ```
+      
+      更严谨的做法是为C语言函数接口定义严格的头文件，然后基于稳定的头文件实现代码。
+  * 结构体、联合、枚举类型
+   * 如果结构体的成员名字中碰巧是Go语言的关键字，可以通过在成员名开头添加下划线来访问
+           ```
+           /*
+           struct A {
+           	int type; // type 是 Go 语言的关键字
+           };
+           */
+           import "C"
+           import "fmt"
+           
+           func main() {
+           	var a C.struct_A
+           	fmt.Println(a._type) // _type 对应 type
+           }
+           ```
+    *   一个是以Go语言关键字命名，另一个刚好是以下划线和Go语言关键字命名，那么以Go语言关键字命名的成员将无法访问（被屏蔽）      
+    *  C语言结构体中位字段对应的成员无法在Go语言中访问，如果需要操作位字段成员，需要通过在C语言中定义辅助函数来完成。对应零长数组的成员，无法在Go语言中直接访问数组的元素，但其中零长的数组成员所在位置的偏移量依然可以通过unsafe.Offsetof(a.arr)来访问     
+    *  对于联合类型，我们可以通过C.union_xxx来访问C语言中定义的union xxx类型。但是Go语言中并不支持C语言联合类型，它们会被转为对应大小的字节数组
+    *  需要操作C语言的联合类型变量，一般有三种方法：第一种是在C语言中定义辅助函数；第二种是通过Go语言的"encoding/binary"手工解码成员(需要注意大端小端问题)；第三种是使用unsafe包强制转型为对应类型(这是性能最好的方式)
+      
+    
+       union B {
+       	int i;
+      	float f;
+        };
+        var b C.union_B;
+     	fmt.Println("b.i:", *(*C.int)(unsafe.Pointer(&b)))
+     	fmt.Println("b.f:", *(*C.float)(unsafe.Pointer(&b)))
+     	
+
+      
+  *  对于枚举类型，我们可以通过C.enum_xxx来访问C语言中定义的enum xxx结构体类型
+   ```go
+   /*
+   enum C {
+   	ONE,
+   	TWO,
+   };
+   */
+   import "C"
+   import "fmt"
+   
+   func main() {
+   	var c C.enum_C = C.TWO
+   	fmt.Println(c)
+   	fmt.Println(C.ONE)
+   	fmt.Println(C.TWO)
+   }
+   ```
+      
+
+      
