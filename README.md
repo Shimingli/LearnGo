@@ -216,8 +216,11 @@
    * C调用Go导出的函数:没有导出成功   
    * CGO的内部的机制：todo  
    
-* 2018.8.9
+* 2018.8.9 
+   *  认识qsort 函数 `SevenQsortDemo` `SevenQsortDemo4` `SevenQsortDemo2` `SevenQsortDemo3` 和 `qsort`包下的函数
    *  找到本地的文件通过 gcc的命令编译 `gcc ./qsortDemo.c`，然后得到一个 `a.exe` ,然后去运行，等到结果，通过`#include<windows.h> `使得线程睡了10s `Sleep(10000)`   
+   *  将qsort函数从Go包导出:说白了，通过包的方式被其它用户使用
+   *  底层是C语言库，怎么把它封装一下，让go去调用，然后调用到最后，形式看起来和调用go的函数包一样，没有差别  这就是这个Demo的精髓 
    
   
    
