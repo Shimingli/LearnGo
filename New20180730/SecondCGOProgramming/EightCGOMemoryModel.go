@@ -37,6 +37,45 @@ func main() {
 	//C临时访问传入的Go内存
 	CVisitGo_demo()
 
+	// C长期持有Go指针对象
+	CLongHoldGo()
+
+
+   // 导出的C的函数不能返回Go内存
+	//在Go语言中，Go是从一个固定的虚拟地址空间分配内存。而C语言分配的内存则不能使用Go语言保留的虚拟内存空间。在CGO环境，Go语言运行时默认会检查导出返回的内存是否是由Go语言分配的，如果是则会抛出运行时异常。
+	demo()
+}
+func demo() {
+    fmt.Println("导出的C的函数不能返回Go内存")
+
+	//C.Main()
+
+
+	//extern int* getGoPtr();
+	//static void Main(){
+	//	printf("我是 Main 方法中的输出的语句 \n");
+	//	int* p = getGoPtr();
+	//	*p = 42;
+	//}
+
+}
+////export getGoPtr
+//func getGoPtr() *C.int  {
+//	fmt.Println("我开始执行了啊  getGoPtr () ")
+//	return  new(C.int)
+//}
+
+
+
+/*
+使用Go调用C函数，其实CGo中，C函数也可以回调Go函数。但是C语言函数调用Go语言函数的时候，C语言函数就成了程序的调用方，Go语言函数返回的Go对象内存的生命周期也就自然超出了Go语言运行时的管理。简言之，我们不能在C语言函数中直接使用Go语言对象的内存。
+虽然Go语言禁止在C语言函数中长期持有Go指针对象，但是这种需求是切实存在的。如果需要在C语言中访问Go语言内存对象，我们可以将Go语言内存对象在Go语言空间映射为一个int类型的id，然后通过此id来间接访问和控制Go语言对象。
+
+以下代码用于将Go对象映射为整数类型的ObjectId，用完之后需要手工调用free方法释放该对象ID：
+ */
+func CLongHoldGo() {
+   //  todo   EightCLongHoldGoDemo.go   And  EightCLongHoldGoDemoTwo.go
+
 }
 /*
 cgo之所以存在的一大因素是为了方便在Go语言中接纳吸收过去几十年来使用C/C++语言软件构建的大量的软件资源。C/C++很多库都是需要通过指针直接处理传入的内存数据的，因此cgo中也有很多需要将Go内存传入C语言函数的应用场景
