@@ -1,0 +1,12 @@
+// 指定使用proto3，如果不指定的话，编译器会使用proto2去编译
+syntax = "proto3"; //[proto2|proto3]
+
+package main;//package指令指明当前是main包（这样可以和Go的包名保持一致，简化例子代码）
+
+//后message关键字定义一个新的String类型，在最终生成的Go语言代码中对应一个String结构体。String类型中只有一个字符串类型的value成员，该成员编码时用1编号代替名字。
+message SearchRequests {
+    // 定义SearchRequests的成员变量，需要指定：变量类型、变量名、变量Tag
+    string query = 1;
+    int32 page_number = 2;
+    int32 result_per_page = 3;
+}

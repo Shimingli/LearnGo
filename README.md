@@ -239,8 +239,10 @@
  *  为了利于后期的维护，使用接口规范去增加对客户端和服务端进行更为安全的包装 
  * go 语言的RPC框架有两个比较特色的设计 1、RPC数据打包时候可以通过插件实现自定义的编码和解码 2、RPC建立在抽象的 `io.ReadWriteCloser `接口上，这样我们就可以将RPC假设在不同的通讯协议上   
  * 无论采用何种的语言，只要遵循同样的json结构，以同样的流程就可以和Go语言编程的RPC服务进行通信  
-   
-   
+  * protoc --go_out=. hello.proto  真的是憋屈，为了生成一个这个，花费了一下午麻痹啊！两个博客在这里
+     *  1、首先是安装官方的protoc工具，可以从 https://github.com/google/protobuf/releases 下载。然后是安装针对Go语言的代码生成插件，可以通过go get github.com/golang/protobuf/protoc-gen-go命令安装。
+     *  2、https://www.cnblogs.com/jkko123/p/7161843.html  
+     *  3、一定仔细的看啊，下载需要的东西啊，麻痹啊！ 一定要仔仔细细啊！真的是难受  
   
    
  
