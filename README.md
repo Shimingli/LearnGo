@@ -236,7 +236,7 @@
 * 2018.8.15
   * RPC和Protocol buf，RPC：远程调用的缩写（Remote Procedure Call），远程调用一个函数，RPC使用的函数特别多，沟通语言成为了障碍，所以Protocol buf 支持不同的语言（甚至可以扩展不支持的语言），这样就成为了RPC世界的接口交流的语言。
  * RPC hello world 的Demo   
-   
+ *  为了利于后期的维护，使用接口规范去增加对客户端和服务端进行更为安全的包装 
    
    
    
