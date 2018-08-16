@@ -252,7 +252,8 @@
       * 3、然后在把这个exe的文件复制到 gopath的bin的目录！并且改名字为 protoc-gen-go-netrpc
       * 4、然后使用命令 ： protoc --go-netrpc_out=plugins=netrpc:. helloTwo.proto 
       * 5、然后大功告成 
-   
+   *  自动生成完整的RPC代码 :定制Protobuf插件技术
+    
    
    
    
