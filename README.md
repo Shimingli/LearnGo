@@ -243,6 +243,22 @@
      *  1、首先是安装官方的protoc工具，可以从 https://github.com/google/protobuf/releases 下载。然后是安装针对Go语言的代码生成插件，可以通过go get github.com/golang/protobuf/protoc-gen-go命令安装。
      *  2、https://www.cnblogs.com/jkko123/p/7161843.html  
      *  3、一定仔细的看啊，下载需要的东西啊，麻痹啊！ 一定要仔仔细细啊！真的是难受  
+
+* 2018.8.16 
+   * 添加 proctoc的exe的文件，如果需要使用的话，直接把这个文件放在 gopath的 bin的目录下，就可以了！！！
+   * 这个流程非常的牛逼：定制代码生成插件go和protocbuf 
+      * 1、流程第一步：写个文件放到 protoc-gen-go的目录的generator的目录下，这个文件是：设计一个netrpcPlugin插件，用于为标准库的RPC框架生成代码，名称为protoc-gen-go-netrpc.go:一定要调试流程通过
+      * 2、使用go build的命令在protoct-gen-go的目录下，如果代码没问题的话，就会生成， protoc-gen-go.exe的文件，
+      * 3、然后在把这个exe的文件复制到 gopath的bin的目录！并且改名字为 protoc-gen-go-netrpc
+      * 4、然后使用命令 ： protoc --go-netrpc_out=plugins=netrpc:. helloTwo.proto 
+      * 5、然后大功告成 
+   
+   
+   
+   
+   
+     
+
   
    
  
